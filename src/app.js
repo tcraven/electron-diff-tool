@@ -155,7 +155,7 @@ class App extends Component {
             modified: true,
             removedChange: prevChange,
             addedChange: change,
-            charDiffs: jsdiff.diffWords(prevChange.value, change.value)
+            charDiffs: jsdiff.diffWordsWithSpace(prevChange.value, change.value)
           });
           wasPrevModified = true;
           i += 1;
