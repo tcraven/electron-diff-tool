@@ -27,7 +27,7 @@ const LineNumbers = (props) => {
   }
   return (
     <div className="line-numbers">
-      <pre>{lineNumbers.join('\n')}</pre>
+      <pre className="line-numbers-pre">{lineNumbers.join('\n')}</pre>
     </div>
   );
 };
