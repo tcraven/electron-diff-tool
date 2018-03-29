@@ -1,0 +1,75 @@
+body {
+  overflow: hidden !important;
+  margin: 0 !important;
+  background-color: #DDD;
+  font-family: sans-serif;
+}
+pre {
+  font-size: 14px;
+  font-family: 'SF Mono', monospace;
+}
+
+.app {
+  height: 100vh;
+  display: flex;
+  /*background-color: #FCC;*/
+}
+
+.menu {
+  width: 200px;
+  background-color: #F55;
+}
+.menu-comparison {
+  padding: 10px;
+  word-wrap: break-word;
+}
+
+.doc {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  overflow-x: scroll;
+  overflow-y: visible;
+}
+
+.doc-a {
+  /*background-color: #77C;*/
+}
+
+.doc-b {
+  /*background-color: #55F;*/
+}
+
+.middle {
+  width: 60px;
+  background-color: #555;
+}
+
+.line-numbers {
+  /*background-color: #0FA;*/
+}
+
+.doc-html {
+  flex: 1;
+  /*background-color: #0AF;*/
+  white-space: nowrap;
+  font-size: 14px;
+  font-family: 'SF Mono', monospace;
+}
+
+.doc-removed {
+  background-color: #F00;
+}
+.doc-added {
+  background-color: #0F0;
+}
+.doc-modified {
+  background-color: #08F;
+}
+.doc-modified-removed {
+  background-color: #0BF;
+}
+.doc-modified-added {
+  background-color: #0BF;
+}
+

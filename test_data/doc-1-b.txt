@@ -1,0 +1,64 @@
+MSUBluetoothGattServerCallback bsc = new MSUBluetoothGattServerCallback();
+bts = btm.openGattServer(getReactApplicationContext(), bsc);
+if (bts == null) {
+    errorCallback.invoke("BleNotSupported");
+    return;
+}
+bsc.setGattServer(bts);
+bts.addService(service);
+
+advertiseCallback = new AdvertiseCallback() {
+
+    @Override
+    public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+        super.onStartSuccess(settingsInEffect);
+        Log.d("BLE", "BLE Advertising Started");
+    }
+
+};
+
+static class MSUBluetoothGattServerCallback extends BluetoothGattServerCallback {
+    BluetoothGattServer gattServer = null;
+
+    public void setGattServer(BluetoothGattServer gattServer) {
+        this.gattServer = gattServer;
+    }
+    @Override
+    public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+        super.onConnectionStateChange(device, status, newState);
+        if (newState == BluetoothGattServer.STATE_CONNECTED) {
+            Log.d("BLE", "Server Connected");
+        }
+        if (newState == BluetoothGattServer.STATE_DISCONNECTED) {
+            Log.d("BLE", "Server Disconnected");
+        }
+    }
+
+    @Override
+    public void onServiceAdded(int status, BluetoothGattService service) {
+        Log.d("BLE", "Service added status: " + status);
+    }
+
+    @Override
+    public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
+        Log.d("BLE", "onCharacteristicReadRequest: ");
+        if (gattServer != null) {
+            Log.d("BLE", "onCharacteristicReadRequest: gattServer not null. Sending response");
+            gattServer.sendResponse(device, requestId, 0, offset, characteristic.getValue());
+        } else {
+            Log.d("BLE", "onCharacteristicReadRequest: gattServer null. cannot send response");
+        }
+    }
+}
+
+@ReactMethod
+public void stopAdvertising(Callback errorCallback) {
+    Log.d("BLE", "Stop announcing");
+    bts.clearServices();
+    bts.close();
+    if (advertiseCallback != null) {
+        advertiser.stopAdvertising(advertiseCallback);
+    } else {
+        errorCallback.invoke("S2 - BLE - Attempting to stop BLE advertising without an initialized advertiseCallback");
+    }
+}

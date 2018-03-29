@@ -1,0 +1,21 @@
+Diff Tool
+
+- Simple version of Kaleidoscope
+- Left panel with file list
+- Two side-by-side text panels
+
+- Technique for background workers in electron is simple hidden window:
+	https://github.com/johnhaley81/electron-background-task-app
+
+- Use electron, electron-forge
+	- ES6 inside electron
+
+- Use flex CSS which is similar to react native flex
+
+- Definitely use react first
+	- Looks simple to include unsafe HTML if necessary
+	- Just need to figure out lifecycle of HTML since it is large
+	- Allows re-use of components like gutters, line numbers, etc
+
+$ electron-forge start -- /Urs/tcraven/Documents/tcraven.org/electron-diff-tool/test_data/doc-1-a.txt /Users/tcraven/Documents/tcraven.org/electron-diff-tool/test_data/doc-1-b.txt
+
