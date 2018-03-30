@@ -245,7 +245,9 @@ class App extends Component {
     }
     return (
       <div className="app">
+        {/*
         <Menu comparisons={this.state.comparisons} />
+        */}
         <Doc className="doc-a" doc={comparison.docA} />
         <Middle />
         <Doc className="doc-b" doc={comparison.docB} />
