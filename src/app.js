@@ -74,6 +74,8 @@ class App extends Component {
     this.state = {
       comparisons: []
     };
+    // Used to draw after a render
+    this.drawTimer = null;
   }
 
   componentDidMount() {
@@ -91,7 +93,6 @@ class App extends Component {
   }
 
   async load() {
-
     let args = electron.remote.process.argv;
     console.log('QQQ', args);
     let filenameA = args[2];
@@ -178,17 +179,18 @@ class App extends Component {
 
       let chunksA = [];
       let chunksB = [];
+      let lineNumberA = 1;
+      let lineNumberB = 1;
+      let changeIndex = 0;
       for (let change of comparison.diffs) {
-        if (change.modified) {
-          // chunksA.push('<span class="doc-modified">');
-          // chunksA.push(this.getHtml(change.removedChange.value));
-          // chunksA.push('</span>');
-          // chunksB.push('<span class="doc-modified">');
-          // chunksB.push(this.getHtml(change.addedChange.value));
-          // chunksB.push('</span>');
+        change.lineNumbers = {
+          a: { start: lineNumberA },
+          b: { start: lineNumberB }
+        };
 
-          chunksA.push('<div class="doc-modified">');
-          chunksB.push('<div class="doc-modified">');
+        if (change.modified) {
+          chunksA.push(`<div class="doc-modified" data-change="${changeIndex}">`);
+          chunksB.push(`<div class="doc-modified" data-change="${changeIndex}">`);
           for (let charChange of change.charDiffs) {
             if (charChange.removed) {
               chunksA.push('<span class="doc-modified-removed">');
@@ -207,28 +209,57 @@ class App extends Component {
           }
           chunksA.push('</div>');
           chunksB.push('</div>');
+
+          lineNumberA += change.removedChange.count;
+          lineNumberB += change.addedChange.count;
+          changeIndex += 1;
         }
         else if (change.removed) {
-          chunksA.push('<div class="doc-removed">');
+          chunksA.push(`<div class="doc-removed" data-change="${changeIndex}">`);
+          chunksB.push(`<div class="doc-removed" data-change="${changeIndex}">`);
+
           chunksA.push('<span class="doc-removed-chars">');
           chunksA.push(this.getHtml(change.value));
           chunksA.push('</span>');
           chunksA.push('</div>');
+          chunksB.push('</div>');
+
+          lineNumberA += change.count;
+          changeIndex += 1;
         }
         else if (change.added) {
-          chunksB.push('<div class="doc-added">');
+          chunksA.push(`<div class="doc-added" data-change="${changeIndex}">`);
+          chunksB.push(`<div class="doc-added" data-change="${changeIndex}">`);
+
           chunksB.push('<span class="doc-added-chars">');
           chunksB.push(this.getHtml(change.value));
           chunksB.push('</span>');
+          chunksA.push('</div>');
           chunksB.push('</div>');
+
+          lineNumberB += change.count;
+          changeIndex += 1;
         }
         else {
           chunksA.push(this.getHtml(change.value));
           chunksB.push(this.getHtml(change.value));
+
+          lineNumberA += change.count;
+          lineNumberB += change.count;
         }
+
+        change.lineNumbers.a.end = lineNumberA;
+        change.lineNumbers.b.end = lineNumberB; 
       }
+
       comparison.docA.changesHtml = chunksA.join('');
       comparison.docB.changesHtml = chunksB.join('');
+    
+      // Determine the changes for drawing lines and scroll locking
+      comparison.changes = comparison.diffs.filter((change) => {
+        return (change.added || change.removed || change.modified);
+      });
+
     }
 
     console.log('XXX', comparisons);
@@ -239,6 +270,10 @@ class App extends Component {
   }
 
   render() {
+    console.log('XXX render');
+    clearTimeout(this.drawTimer);
+    this.drawTimer = setTimeout(() => { this.renderOverlays(); }, 10);
+
     let comparison = this.state.comparisons[0];
     if (!comparison) {
       return null;
@@ -253,6 +288,10 @@ class App extends Component {
         <Doc className="doc-b" doc={comparison.docB} />
       </div>
     );
+  }
+
+  renderOverlays() {
+    console.log('XXX renderOverlays');
   }
 
 }

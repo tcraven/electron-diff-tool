@@ -23,3 +23,7 @@ $ git difftool --tool opendiff ba8ae6b src/screens/home-screen.js
 $ git difftool ba8ae6b src/screens/home-screen.js
 
 $ electron-forge start -- /Users/tcraven/Documents/tcraven.org/electron-diff-tool/test_data/doc-2-a.js /Users/tcraven/Documents/tcraven.org/electron-diff-tool/test_data/doc-2-b.js
+
+# Build an app
+$ electron-forge make
+# Copy the app from the out/electron-diff-tool-darwin-x64 directory in Applications
