@@ -61,13 +61,19 @@ body {
 }
 
 .doc-removed {
-  background-color: #F00;
+  background-color: #F55;
+}
+.doc-removed-chars {
+  background-color: #F77;
 }
 .doc-added {
-  background-color: #0F0;
+  background-color: #5C5;
+}
+.doc-added-chars {
+  background-color: #7E7;
 }
 .doc-modified {
-  background-color: #08F;
+  background-color: #09F;
 }
 .doc-modified-removed {
   background-color: #0BF;

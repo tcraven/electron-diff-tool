@@ -106,17 +106,6 @@ class HomeScreen extends Screen {
     };
   };
 
-  // This function is called when the navigator state changes.
-  //
-  onNavigationStateChange = (prevNavState, newNavState) => {
-    let prevScreenName = Utils.getNavigatorRouteName(prevNavState);
-    let nextScreenName = Utils.getNavigatorRouteName(newNavState);
-
-    if (nextScreenName !== prevScreenName) {
-      GoogleAnalytics.trackScreenView(nextScreenName);
-    }
-  };
-
   render() {
     return (
       <HomeNavigator

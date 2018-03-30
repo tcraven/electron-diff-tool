@@ -187,8 +187,8 @@ class App extends Component {
           // chunksB.push(this.getHtml(change.addedChange.value));
           // chunksB.push('</span>');
 
-          chunksA.push('<span class="doc-modified">');
-          chunksB.push('<span class="doc-modified">');
+          chunksA.push('<div class="doc-modified">');
+          chunksB.push('<div class="doc-modified">');
           for (let charChange of change.charDiffs) {
             if (charChange.removed) {
               chunksA.push('<span class="doc-modified-removed">');
@@ -205,18 +205,22 @@ class App extends Component {
               chunksB.push(this.getHtml(charChange.value));
             }
           }
-          chunksA.push('</span>');
-          chunksB.push('</span>');
+          chunksA.push('</div>');
+          chunksB.push('</div>');
         }
         else if (change.removed) {
-          chunksA.push('<span class="doc-removed">');
+          chunksA.push('<div class="doc-removed">');
+          chunksA.push('<span class="doc-removed-chars">');
           chunksA.push(this.getHtml(change.value));
           chunksA.push('</span>');
+          chunksA.push('</div>');
         }
         else if (change.added) {
-          chunksB.push('<span class="doc-added">');
+          chunksB.push('<div class="doc-added">');
+          chunksB.push('<span class="doc-added-chars">');
           chunksB.push(this.getHtml(change.value));
           chunksB.push('</span>');
+          chunksB.push('</div>');
         }
         else {
           chunksA.push(this.getHtml(change.value));
