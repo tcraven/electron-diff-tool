@@ -27,3 +27,7 @@ $ electron-forge start -- /Users/tcraven/Documents/tcraven.org/electron-diff-too
 # Build an app
 $ electron-forge make
 # Copy the app from the out/electron-diff-tool-darwin-x64 directory in Applications
+
+var matches = document.querySelectorAll("iframe[data-change]");
+
+Removed Doc classNames that are no longer used. Added doc header that shows the filename.

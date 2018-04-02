@@ -23,17 +23,23 @@ body {
 .doc {
   flex: 1;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   overflow-x: scroll;
   overflow-y: visible;
 }
-
-.doc-a {
-  /*background-color: #77C;*/
+.doc-head {
+  background-color: #333;
+  color: #CCC;
+  font-size: 14px;
+  font-family: 'SF Mono', monospace;
+  padding: 10px;
 }
-
-.doc-b {
-  /*background-color: #55F;*/
+.doc-body {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  overflow-x: scroll;
+  overflow-y: visible;
 }
 
 .middle {

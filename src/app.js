@@ -46,15 +46,20 @@ const DocHtml = (props) => {
 const Doc = (props) => {
   if (props.doc.error) {
     return (
-      <div className={`doc ${props.className}`}>
+      <div className="doc">
         <div>{props.doc.error.toString()}</div>
       </div>
     );
   }
   return (
-    <div className={`doc ${props.className}`}>
-      <LineNumbers count={props.doc.lineCount} />
-      <DocHtml html={props.doc.changesHtml} />
+    <div className="doc">
+      <div className="doc-head">
+        {props.doc.filename}
+      </div>
+      <div className="doc-body">
+        <LineNumbers count={props.doc.lineCount} />
+        <DocHtml html={props.doc.changesHtml} />
+      </div>
     </div>
   );
 };
@@ -283,9 +288,9 @@ class App extends Component {
         {/*
         <Menu comparisons={this.state.comparisons} />
         */}
-        <Doc className="doc-a" doc={comparison.docA} />
+        <Doc doc={comparison.docA} />
         <Middle />
-        <Doc className="doc-b" doc={comparison.docB} />
+        <Doc doc={comparison.docB} />
       </div>
     );
   }
