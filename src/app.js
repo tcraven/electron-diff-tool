@@ -56,7 +56,7 @@ const Doc = (props) => {
       <div className="doc-head">
         {props.doc.filename}
       </div>
-      <div className="doc-body">
+      <div className={`doc-body ${props.className}`}>
         <LineNumbers count={props.doc.lineCount} />
         <DocHtml html={props.doc.changesHtml} />
       </div>
@@ -81,6 +81,8 @@ class App extends Component {
     };
     // Used to draw after a render
     this.drawTimer = null;
+
+    this.onScroll = this.onScroll.bind(this);
   }
 
   componentDidMount() {
@@ -288,15 +290,96 @@ class App extends Component {
         {/*
         <Menu comparisons={this.state.comparisons} />
         */}
-        <Doc doc={comparison.docA} />
+        <Doc className="docA" doc={comparison.docA} />
         <Middle />
-        <Doc doc={comparison.docB} />
+        <Doc className="docB" doc={comparison.docB} />
       </div>
     );
   }
 
   renderOverlays() {
     console.log('XXX renderOverlays');
+    // var matches = document.querySelectorAll("iframe[data-change]");
+
+    this.scrollInfo = {};
+    let docBodyElements = document.querySelectorAll('.doc-body');
+    for (let el of docBodyElements) {
+      el.removeEventListener('scroll', this.onScroll);
+      el.addEventListener('scroll', this.onScroll);
+      this.scrollInfo[el.className] = {
+        top: el.scrollTop,
+        left: el.scrollLeft
+      };
+    }
+
+    this.changePositions = [];
+    this.changes = this.state.comparisons[0].changes;
+    // Change elements are already in the correct order so their
+    // indexes correspond to the changes indexes
+    let changeElsA = document.querySelectorAll('.docA div[data-change]');
+    let changeElsB = document.querySelectorAll('.docB div[data-change]');
+    for (let i = 0; i < changeElsA.length; i++) {
+      this.changePositions.push({
+        a: {
+          top: changeElsA[i].offsetTop,
+          bottom: changeElsA[i].offsetTop + changeElsA[i].offsetHeight
+        },
+        b: {
+          top: changeElsB[i].offsetTop,
+          bottom: changeElsB[i].offsetTop + changeElsB[i].offsetHeight
+        }
+      });
+    }
+
+    // console.log(this.scrollInfo);
+
+    this.middleEl = document.querySelector('.middle');
+
+    this.updateLines();
+  }
+
+  onScroll(e) {
+    this.scrollInfo[e.target.className] = {
+      top: e.target.scrollTop,
+      left: e.target.scrollLeft
+    };
+    this.updateLines();
+  }
+
+  updateLines() {
+    // console.log('XXX updateLines');
+    if (!this.middleEl || !this.scrollInfo) {
+      return;
+    }
+    // console.log('QQQ', this.middleEl.children);
+    for (let el of this.middleEl.children) {
+      el.remove();
+    }
+    // console.log('QQQ', this.middleEl.children);
+    let width = this.middleEl.offsetWidth;
+    let scrollTopA = this.scrollInfo['doc-body docA'].top;
+    let scrollTopB = this.scrollInfo['doc-body docB'].top;
+    let tags = [];
+    tags.push(`<svg width="${width}" height="${this.middleEl.offsetHeight}">`);
+    for (let i = 0; i < this.changePositions.length; i++) {
+      let change = this.changes[i];
+      let changePos = this.changePositions[i];
+      let topA = changePos.a.top - scrollTopA;
+      let bottomA = changePos.a.bottom - scrollTopA;
+      let topB = changePos.b.top - scrollTopB;
+      let bottomB = changePos.b.bottom - scrollTopB;
+      let color = '#000';
+      if (change.added) { color = '#5C5'; }
+      if (change.removed) { color = '#F55'; }
+      if (change.modified) { color = '#09F'; }
+      tags.push(`<polygon points="0,${bottomA} 0,${topA} ${width},${topB} ${width},${bottomB}" `);
+      tags.push(`style="fill:${color};stroke-width:1;stroke:${color}" />`);
+    }
+    tags.push('</svg>');
+
+    this.middleEl.insertAdjacentHTML('afterbegin', tags.join(''));
+    // console.log(this.middleEl);
+    // console.log(scrollTopA, scrollTopB);
   }
 
 }
