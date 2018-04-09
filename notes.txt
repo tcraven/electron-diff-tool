@@ -17,8 +17,6 @@ Diff Tool
 	- Just need to figure out lifecycle of HTML since it is large
 	- Allows re-use of components like gutters, line numbers, etc
 
-$ electron-forge start -- /Urs/tcraven/Documents/tcraven.org/electron-diff-tool/test_data/doc-1-a.txt /Users/tcraven/Documents/tcraven.org/electron-diff-tool/test_data/doc-1-b.txt
-
 $ git difftool --tool opendiff ba8ae6b src/screens/home-screen.js
 $ git difftool ba8ae6b src/screens/home-screen.js
 

@@ -83,6 +83,7 @@ class App extends Component {
     this.drawTimer = null;
 
     this.onScroll = this.onScroll.bind(this);
+    this.updateLines = this.updateLines.bind(this);
   }
 
   componentDidMount() {
@@ -302,10 +303,12 @@ class App extends Component {
     // var matches = document.querySelectorAll("iframe[data-change]");
 
     this.scrollInfo = {};
+    this.docBodyElements = {};
     let docBodyElements = document.querySelectorAll('.doc-body');
     for (let el of docBodyElements) {
       el.removeEventListener('scroll', this.onScroll);
       el.addEventListener('scroll', this.onScroll);
+      this.docBodyElements[el.className] = el;
       this.scrollInfo[el.className] = {
         top: el.scrollTop,
         left: el.scrollLeft
@@ -319,67 +322,127 @@ class App extends Component {
     let changeElsA = document.querySelectorAll('.docA div[data-change]');
     let changeElsB = document.querySelectorAll('.docB div[data-change]');
     for (let i = 0; i < changeElsA.length; i++) {
-      this.changePositions.push({
+      let changePos = {
+        index: i,
         a: {
           top: changeElsA[i].offsetTop,
-          bottom: changeElsA[i].offsetTop + changeElsA[i].offsetHeight
+          bottom: changeElsA[i].offsetTop + changeElsA[i].offsetHeight,
+          center: changeElsA[i].offsetTop + 0.5 * changeElsA[i].offsetHeight
         },
         b: {
           top: changeElsB[i].offsetTop,
-          bottom: changeElsB[i].offsetTop + changeElsB[i].offsetHeight
+          bottom: changeElsB[i].offsetTop + changeElsB[i].offsetHeight,
+          center: changeElsB[i].offsetTop + 0.5 * changeElsB[i].offsetHeight
         }
-      });
+      };
+      changePos.a.height = changePos.a.bottom - changePos.a.top;
+      changePos.b.height = changePos.b.bottom - changePos.b.top;
+      this.changePositions.push(changePos);
     }
 
-    // console.log(this.scrollInfo);
+    console.log('changePositions', this.changePositions);
 
     this.middleEl = document.querySelector('.middle');
 
-    this.updateLines();
+    this.isRepaintRequired = true;
+    window.requestAnimationFrame(this.updateLines);
   }
 
-  onScroll(e) {
-    this.scrollInfo[e.target.className] = {
-      top: e.target.scrollTop,
-      left: e.target.scrollLeft
+  onScroll(e) {    
+    let className = e.target.className;
+    let scrollTop = e.target.scrollTop;
+    let scrollLeft = e.target.scrollLeft;
+
+    // If this scroll event wasn't caused by the user,
+    // do nothing
+    if (this.scrollClassName && this.scrollClassName != className) {
+      return;
+    }
+    this.scrollClassName = className;
+    clearTimeout(this.scrollTimer);
+    this.scrollTimer = setTimeout(() => {
+      this.scrollClassName = null;
+    }, 100);
+    
+    this.scrollInfo[className] = {
+      top: scrollTop,
+      left: scrollLeft
     };
-    this.updateLines();
+
+    // Calculate the scrollTop and scrollLeft of the other
+    // document and apply it
+    let docKey = (className == 'doc-body docA') ? 'a' : 'b';
+    let otherDocKey = (className == 'doc-body docA') ? 'b' : 'a';
+    let otherClassName = (className == 'doc-body docA') ?
+      'doc-body docB' : 'doc-body docA';
+
+    let otherScrollLeft = scrollLeft;
+    let otherScrollTop = scrollTop;
+
+    // Find change closest to baseline and adjust scroll of other
+    // doc so that the centers line up
+    let otherBodyEl = this.docBodyElements[otherClassName];
+    // Choose baseline y position as the center of the window
+    let baselineTop = 0.5 * otherBodyEl.offsetHeight;
+    let baselineChangePos = null;
+    let minBaselineDist = null;
+
+    for (let changePos of this.changePositions) {
+      let changeDisplayCenter = changePos[docKey].center - scrollTop;
+      let baselineDist = Math.abs(changeDisplayCenter - baselineTop);
+      if (minBaselineDist == null || baselineDist < minBaselineDist) {
+        minBaselineDist = baselineDist;
+        baselineChangePos = changePos;
+      }
+    }
+
+    let dCenter = baselineChangePos[docKey].center - baselineChangePos[otherDocKey].center;
+    otherScrollTop -= dCenter;
+    otherScrollTop = Math.max(0, otherScrollTop);
+
+    // Assign scrollTop and scrollLeft to other body element,
+    // then get scrollTop and scrollLeft back from the element
+    // as the browser may have limited the values
+    otherBodyEl.scrollTop = otherScrollTop;
+    otherBodyEl.scrollLeft = otherScrollLeft;
+    this.scrollInfo[otherClassName] = {
+      top: otherBodyEl.scrollTop,
+      left: otherBodyEl.scrollLeft
+    };
+
+    this.isRepaintRequired = true;
   }
 
   updateLines() {
-    // console.log('XXX updateLines');
     if (!this.middleEl || !this.scrollInfo) {
       return;
     }
-    // console.log('QQQ', this.middleEl.children);
-    for (let el of this.middleEl.children) {
-      el.remove();
-    }
-    // console.log('QQQ', this.middleEl.children);
-    let width = this.middleEl.offsetWidth;
-    let scrollTopA = this.scrollInfo['doc-body docA'].top;
-    let scrollTopB = this.scrollInfo['doc-body docB'].top;
-    let tags = [];
-    tags.push(`<svg width="${width}" height="${this.middleEl.offsetHeight}">`);
-    for (let i = 0; i < this.changePositions.length; i++) {
-      let change = this.changes[i];
-      let changePos = this.changePositions[i];
-      let topA = changePos.a.top - scrollTopA;
-      let bottomA = changePos.a.bottom - scrollTopA;
-      let topB = changePos.b.top - scrollTopB;
-      let bottomB = changePos.b.bottom - scrollTopB;
-      let color = '#000';
-      if (change.added) { color = '#5C5'; }
-      if (change.removed) { color = '#F55'; }
-      if (change.modified) { color = '#09F'; }
-      tags.push(`<polygon points="0,${bottomA} 0,${topA} ${width},${topB} ${width},${bottomB}" `);
-      tags.push(`style="fill:${color};stroke-width:1;stroke:${color}" />`);
-    }
-    tags.push('</svg>');
+    if (this.isRepaintRequired) {
+      let width = this.middleEl.offsetWidth;
+      let scrollTopA = this.scrollInfo['doc-body docA'].top;
+      let scrollTopB = this.scrollInfo['doc-body docB'].top;
+      let tags = [];
+      tags.push(`<svg width="${width}" height="${this.middleEl.offsetHeight}">`);
+      for (let i = 0; i < this.changePositions.length; i++) {
+        let change = this.changes[i];
+        let changePos = this.changePositions[i];
+        let topA = changePos.a.top - scrollTopA;
+        let bottomA = changePos.a.bottom - scrollTopA;
+        let topB = changePos.b.top - scrollTopB;
+        let bottomB = changePos.b.bottom - scrollTopB;
+        let color = '#000';
+        if (change.added) { color = '#5C5'; }
+        if (change.removed) { color = '#F55'; }
+        if (change.modified) { color = '#09F'; }
+        tags.push(`<polygon points="0,${bottomA} 0,${topA} ${width},${topB} ${width},${bottomB}" `);
+        tags.push(`style="fill:${color};stroke-width:1;stroke:${color}" />`);
+      }
+      tags.push('</svg>');
 
-    this.middleEl.insertAdjacentHTML('afterbegin', tags.join(''));
-    // console.log(this.middleEl);
-    // console.log(scrollTopA, scrollTopB);
+      this.middleEl.innerHTML = tags.join('');
+      this.isRepaintRequired = false;
+    }
+    window.requestAnimationFrame(this.updateLines);
   }
 
 }
