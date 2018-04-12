@@ -249,8 +249,12 @@ class App extends Component {
           changeIndex += 1;
         }
         else {
+          chunksA.push(`<div class="doc-same" data-change="${changeIndex}">`);
+          chunksB.push(`<div class="doc-same" data-change="${changeIndex}">`);
           chunksA.push(this.getHtml(change.value));
           chunksB.push(this.getHtml(change.value));
+          chunksA.push('</div>');
+          chunksB.push('</div>');
 
           lineNumberA += change.count;
           lineNumberB += change.count;
@@ -263,11 +267,7 @@ class App extends Component {
       comparison.docA.changesHtml = chunksA.join('');
       comparison.docB.changesHtml = chunksB.join('');
     
-      // Determine the changes for drawing lines and scroll locking
-      comparison.changes = comparison.diffs.filter((change) => {
-        return (change.added || change.removed || change.modified);
-      });
-
+      comparison.changes = comparison.diffs;
     }
 
     console.log('XXX', comparisons);
@@ -322,21 +322,23 @@ class App extends Component {
     let changeElsA = document.querySelectorAll('.docA div[data-change]');
     let changeElsB = document.querySelectorAll('.docB div[data-change]');
     for (let i = 0; i < changeElsA.length; i++) {
+      let heightA = changeElsA[i].offsetHeight;
+      let heightB = changeElsB[i].offsetHeight;
       let changePos = {
         index: i,
         a: {
           top: changeElsA[i].offsetTop,
-          bottom: changeElsA[i].offsetTop + changeElsA[i].offsetHeight,
-          center: changeElsA[i].offsetTop + 0.5 * changeElsA[i].offsetHeight
+          bottom: changeElsA[i].offsetTop + heightA,
+          height: heightA
         },
         b: {
           top: changeElsB[i].offsetTop,
-          bottom: changeElsB[i].offsetTop + changeElsB[i].offsetHeight,
-          center: changeElsB[i].offsetTop + 0.5 * changeElsB[i].offsetHeight
-        }
+          bottom: changeElsB[i].offsetTop + heightB,
+          height: heightB
+        },
+        // TO DO: How to properly handle zero height changes?
+        heightRatio: (heightA > 0) ? (heightB / heightA) : 1000
       };
-      changePos.a.height = changePos.a.bottom - changePos.a.top;
-      changePos.b.height = changePos.b.bottom - changePos.b.top;
       this.changePositions.push(changePos);
     }
 
@@ -383,21 +385,27 @@ class App extends Component {
     // doc so that the centers line up
     let otherBodyEl = this.docBodyElements[otherClassName];
     // Choose baseline y position as the center of the window
-    let baselineTop = 0.5 * otherBodyEl.offsetHeight;
-    let baselineChangePos = null;
-    let minBaselineDist = null;
+    let baselineY = scrollTop + 0.5 * otherBodyEl.offsetHeight;
 
+    // Find the current change that is on the baseline
+    // TO DO: Use a more efficient method
+    let baselineChangePos = null;
     for (let changePos of this.changePositions) {
-      let changeDisplayCenter = changePos[docKey].center - scrollTop;
-      let baselineDist = Math.abs(changeDisplayCenter - baselineTop);
-      if (minBaselineDist == null || baselineDist < minBaselineDist) {
-        minBaselineDist = baselineDist;
+      if (
+        changePos[docKey].top < baselineY &&
+        baselineY <= changePos[docKey].bottom
+      ) {
         baselineChangePos = changePos;
+        break;
       }
     }
 
-    let dCenter = baselineChangePos[docKey].center - baselineChangePos[otherDocKey].center;
-    otherScrollTop -= dCenter;
+    let heightRatio = (docKey == 'a') ? baselineChangePos.heightRatio : 1 / baselineChangePos.heightRatio;
+    otherScrollTop = 
+      baselineChangePos[otherDocKey].top
+      + (baselineY - baselineChangePos[docKey].top) * heightRatio
+      - 0.5 * otherBodyEl.offsetHeight;
+
     otherScrollTop = Math.max(0, otherScrollTop);
 
     // Assign scrollTop and scrollLeft to other body element,
@@ -425,6 +433,9 @@ class App extends Component {
       tags.push(`<svg width="${width}" height="${this.middleEl.offsetHeight}">`);
       for (let i = 0; i < this.changePositions.length; i++) {
         let change = this.changes[i];
+        if (!change.added && !change.removed && !change.modified) {
+          continue;
+        }
         let changePos = this.changePositions[i];
         let topA = changePos.a.top - scrollTopA;
         let bottomA = changePos.a.bottom - scrollTopA;

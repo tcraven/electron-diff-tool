@@ -29,3 +29,6 @@ $ electron-forge make
 var matches = document.querySelectorAll("iframe[data-change]");
 
 Removed Doc classNames that are no longer used. Added doc header that shows the filename.
+
+Added scrolling of the opposite doc to keep changes aligned.
+
