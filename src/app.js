@@ -53,9 +53,6 @@ const Doc = (props) => {
   }
   return (
     <div className="doc">
-      <div className="doc-head">
-        {props.doc.filename}
-      </div>
       <div className={`doc-body ${props.className}`}>
         <LineNumbers count={props.doc.lineCount} />
         <DocHtml html={props.doc.changesHtml} />
@@ -288,12 +285,15 @@ class App extends Component {
     }
     return (
       <div className="app">
-        {/*
-        <Menu comparisons={this.state.comparisons} />
-        */}
-        <Doc className="docA" doc={comparison.docA} />
-        <Middle />
-        <Doc className="docB" doc={comparison.docB} />
+        <div className="header">
+          <div className="filename-a">{comparison.docA.filename}</div>
+          <div className="filename-b">{comparison.docB.filename}</div>
+        </div>
+        <div className="docs">
+          <Doc className="docA" doc={comparison.docA} />
+          <Middle />
+          <Doc className="docB" doc={comparison.docB} />
+        </div>
       </div>
     );
   }
@@ -418,6 +418,8 @@ class App extends Component {
       left: otherBodyEl.scrollLeft
     };
 
+    // console.log(this.scrollInfo);
+
     this.isRepaintRequired = true;
   }
 
@@ -427,6 +429,7 @@ class App extends Component {
     }
     if (this.isRepaintRequired) {
       let width = this.middleEl.offsetWidth;
+      let height = this.middleEl.offsetHeight;
       let scrollTopA = this.scrollInfo['doc-body docA'].top;
       let scrollTopB = this.scrollInfo['doc-body docB'].top;
       let tags = [];
@@ -441,12 +444,20 @@ class App extends Component {
         let bottomA = changePos.a.bottom - scrollTopA;
         let topB = changePos.b.top - scrollTopB;
         let bottomB = changePos.b.bottom - scrollTopB;
-        let color = '#000';
-        if (change.added) { color = '#5C5'; }
-        if (change.removed) { color = '#F55'; }
-        if (change.modified) { color = '#09F'; }
+
+        if (bottomA < 0 && bottomB < 0) {
+          continue;
+        }
+        if (topA > height && topB > height) {
+          continue;
+        }
+
+        let color = null;
+        if (change.added) { color = 'rgba(85, 204, 85, 0.5)'; }  // '#5C5'
+        if (change.removed) { color = 'rgba(255, 85, 85, 0.5)'; }  // '#F55'
+        if (change.modified) { color = 'rgba(0, 153, 255, 0.5)'; }  // '#09F'
         tags.push(`<polygon points="0,${bottomA} 0,${topA} ${width},${topB} ${width},${bottomB}" `);
-        tags.push(`style="fill:${color};stroke-width:1;stroke:${color}" />`);
+        tags.push(`style="fill:${color};stroke-width:0;" />`);
       }
       tags.push('</svg>');
 

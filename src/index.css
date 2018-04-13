@@ -8,6 +8,7 @@ body {
 .app {
   height: 100vh;
   display: flex;
+  flex-direction: column;
   /*background-color: #FCC;*/
 }
 
@@ -20,6 +21,33 @@ body {
   word-wrap: break-word;
 }
 
+.header {
+  background-color: #333;
+  color: #CCC;
+  font-size: 14px;
+  font-family: 'SF Mono', monospace;
+  padding: 10px;
+  display: flex;
+  word-wrap: break-word;
+}
+.filename-a {
+  flex: 1;
+  padding-right: 40px;
+  /*background-color: #F00;*/
+}
+.filename-b {
+  flex: 1;
+  padding-left: 40px;
+  /*background-color: #0F0;*/
+}
+
+.docs {
+  display: flex;
+  flex: 1;
+  overflow-x: scroll;
+  overflow-y: visible;
+}
+
 .doc {
   flex: 1;
   display: flex;
@@ -27,31 +55,26 @@ body {
   overflow-x: scroll;
   overflow-y: visible;
 }
-.doc-head {
-  background-color: #333;
-  color: #CCC;
-  font-size: 14px;
-  font-family: 'SF Mono', monospace;
-  padding: 10px;
-}
+
 .doc-body {
   flex: 1;
   display: flex;
   flex-direction: row;
   overflow-x: scroll;
   overflow-y: visible;
+  position: relative;
 }
 
 .middle {
   width: 60px;
-  background-color: #555;
+  background-color: #BBB;
 }
 
 .line-numbers {
-  /**/
+  position: absolute;
 }
 .line-numbers-pre {
-  background-color: #BBB;
+  /*background-color: #BBB;*/
   font-size: 14px;
   font-family: 'SF Mono', monospace;
   margin: 0;
@@ -64,15 +87,19 @@ body {
   white-space: nowrap;
   font-size: 14px;
   font-family: 'SF Mono', monospace;
-  padding-left: 5px;
+  /*padding-left: 5px;*/
 }
 
+.doc-same {
+  padding-left: 45px;
+}
 .doc-removed {
   background-color: #F55;
   border-top: solid 1px #F55;
   border-bottom: solid 1px #F55;
   margin-top: -1px;
   margin-bottom: -1px;
+  padding-left: 45px;
 }
 .doc-removed-chars {
   background-color: #F77;
@@ -83,6 +110,7 @@ body {
   border-bottom: solid 1px #5C5;
   margin-top: -1px;
   margin-bottom: -1px;
+  padding-left: 45px;
 }
 .doc-added-chars {
   background-color: #7E7;
@@ -93,6 +121,7 @@ body {
   border-bottom: solid 1px #09F;
   margin-top: -1px;
   margin-bottom: -1px;
+  padding-left: 45px;
 }
 .doc-modified-removed {
   background-color: #0BF;
