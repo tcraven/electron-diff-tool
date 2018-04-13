@@ -33,11 +33,15 @@ body {
 .filename-a {
   flex: 1;
   padding-right: 40px;
+  overflow-wrap: break-word;
+  width: 0;
   /*background-color: #F00;*/
 }
 .filename-b {
   flex: 1;
   padding-left: 40px;
+  overflow-wrap: break-word;
+  width: 0;
   /*background-color: #0F0;*/
 }
 
