@@ -69,6 +69,36 @@ const Middle = (props) => {
 };
 
 
+const Sidebar = (props) => {
+  // Render the diffs using percentage heights?
+  // Render a current scroll position based on scroll
+  // position and window height?
+  return (
+    <div className="sidebar"></div>
+  );
+}
+
+
+const AppView = (props) => {
+  let { comparison } = props;
+  return (
+    <div className="app">
+      <div className="header">
+        <div className="filename-a">{comparison.docA.filename}</div>
+        <div className="filename-b">{comparison.docB.filename}</div>
+      </div>
+      <div className="docs">
+        <Sidebar doc={comparison.docA} />
+        <Doc className="docA" doc={comparison.docA} />
+        <Middle />
+        <Doc className="docB" doc={comparison.docB} />
+        <Sidebar doc={comparison.docB} />
+      </div>
+    </div>
+  );
+}
+
+
 class App extends Component {
 
   constructor(props) {
@@ -284,17 +314,7 @@ class App extends Component {
       return null;
     }
     return (
-      <div className="app">
-        <div className="header">
-          <div className="filename-a">{comparison.docA.filename}</div>
-          <div className="filename-b">{comparison.docB.filename}</div>
-        </div>
-        <div className="docs">
-          <Doc className="docA" doc={comparison.docA} />
-          <Middle />
-          <Doc className="docB" doc={comparison.docB} />
-        </div>
-      </div>
+      <AppView comparison={comparison} />
     );
   }
 

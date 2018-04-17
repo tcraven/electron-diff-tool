@@ -70,9 +70,14 @@ body {
 }
 
 .middle {
-  width: 60px;
+  width: 50px;
   background-color: #BBB;
 }
+.sidebar {
+  width: 20px;
+  background-color: #BBB;
+}
+
 
 .line-numbers {
   position: absolute;
