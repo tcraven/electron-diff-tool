@@ -70,11 +70,33 @@ const Middle = (props) => {
 
 
 const Sidebar = (props) => {
-  // Render the diffs using percentage heights?
-  // Render a current scroll position based on scroll
-  // position and window height?
+  let { docKey, changes } = props;
   return (
-    <div className="sidebar"></div>
+    <div className="sidebar">
+      {changes.map((change, changeIndex) => {
+        let className = '';
+        let lineCount = change.count;
+        if (change.added) {
+          className = 'sidebar-added';
+          lineCount = (docKey == 'b') ? change.count : 0;
+        }
+        if (change.removed) {
+          className = 'sidebar-removed';
+          lineCount = (docKey == 'a') ? change.count : 0;
+        }
+        if (change.modified) {
+          className = 'sidebar-modified';
+          lineCount = (docKey == 'a') ?
+            change.removedChange.count : change.addedChange.count;
+        }
+        return (
+          <div
+            key={changeIndex}
+            className={className}
+            style={{ flex: lineCount }} />
+        );
+      })}
+    </div>
   );
 }
 
@@ -88,11 +110,11 @@ const AppView = (props) => {
         <div className="filename-b">{comparison.docB.filename}</div>
       </div>
       <div className="docs">
-        <Sidebar doc={comparison.docA} />
+        <Sidebar docKey="a" changes={comparison.changes} />
         <Doc className="docA" doc={comparison.docA} />
         <Middle />
         <Doc className="docB" doc={comparison.docB} />
-        <Sidebar doc={comparison.docB} />
+        <Sidebar docKey="b" changes={comparison.changes} />
       </div>
     </div>
   );
